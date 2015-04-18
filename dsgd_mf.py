@@ -140,7 +140,7 @@ for ite in xrange (0,ite_time):
     error_new=error/float(total)
     if(abs((error_old-error_new)/error_old)<0.001):
         break;
-    print str(factor_n)+" "+str(error/float(total))
+    print str(error/float(total))
 csvfile=file(csv_W,'w')
 writer=csv.writer(csvfile)
 for i in xrange(1,max_id[0]+1):
