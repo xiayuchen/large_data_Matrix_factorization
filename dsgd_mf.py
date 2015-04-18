@@ -4,8 +4,6 @@ import numpy as np
 import csv
 import math
 from pyspark import SparkContext, SparkConf
-conf = SparkConf().setAppName("test").setMaster("local")
-sc = SparkContext(conf=conf)
 def my_fun(s):
     l=s.split(',')
     return l
@@ -31,7 +29,7 @@ def sgd_update(W,H,iterator):
     bsize_u=bsize.value[1]
     bsize_f=bsize.value[2]
     for s in iterator:
-        tao=int((prev_nb.value+prev)/(total_b.value))
+        tao=int((prev_nb.value+prev)/(total_b.value))*10
         step=pow(tao+100,-beta.value)
         prev+=1
         content=s[1]
@@ -71,13 +69,13 @@ def N_distr_j(s):
     j=int(s[1])
     return [j]
 
-
-
 data_path=sys.argv[6]
+block_size=int(sys.argv[2])
+conf = SparkConf().setAppName("test").setMaster("local["+str(block_size)+"]")
+sc = SparkContext(conf=conf)
 lines=sc.textFile(data_path)
 line_content=lines.map(my_fun)
 max_id=line_content.reduce(lambda a,b: [max(int(a[0]),int(b[0])),max(int(a[1]),int(b[1]))])
-block_size=int(sys.argv[2])
 bsize_u=int(math.ceil(float(max_id[0])/float(block_size)))
 bsize_f=int(math.ceil(float(max_id[1])/float(block_size)))
 bsize=sc.broadcast([block_size,bsize_u,bsize_f])
@@ -138,8 +136,8 @@ for ite in xrange (0,ite_time):
         #print pow(prev_n+100,-beta.value)
     error_old=error_new
     error_new=error/float(total)
-    if(abs((error_old-error_new)/error_old)<0.001):
-        break;
+    #if(abs((error_old-error_new)/error_old)<0.001):
+        #break;
     print str(error/float(total))
 csvfile=file(csv_W,'w')
 writer=csv.writer(csvfile)
@@ -158,5 +156,3 @@ csvfile.close()
     #H=H_a.reduce(lambda a,b : dict(a,** b)).collect()
     #for c in W:
     #    print c
-#strated_line=line_strata.reduce(lambda a: a)
-#print line_strata[1]
